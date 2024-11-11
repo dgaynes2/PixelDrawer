@@ -1,0 +1,53 @@
+import tkinter as tk
+
+import Data
+from Data import Button, GridData
+
+
+def make_button(
+    root,
+    color=None,
+    fg="black",
+    text=None,
+    width=Button.width - 1,
+    height=Button.height,
+    bd=Button.bd,
+    relief=Button.relief,
+    command=None,
+):
+    btn = tk.Button(
+        master=root,
+        bg=color,
+        fg=fg,
+        text=text,
+        width=width,
+        height=height,
+        bd=bd,
+        relief=relief,
+        command=command,
+    )
+    return btn
+
+
+def get_click_coords(event):
+    """Get coords of cursor on cnavas when clicked"""
+
+    curr_g_size = GridData.current_grid_size
+
+    # gets x-coord from left
+    x = curr_g_size * int(event.x / curr_g_size)
+    # gets y-coord from top
+    y = curr_g_size * int(event.y / curr_g_size)
+    # gets x-coord from righy
+    x_sym = (
+        curr_g_size * int(Data.CANVAS_WIDTH / curr_g_size)
+        - int(x / curr_g_size) * curr_g_size
+        - curr_g_size
+    )
+    # gets y-coord from bottom
+    y_sym = (
+        curr_g_size * int(Data.CANVAS_HEIGHT / curr_g_size)
+        - int(y / curr_g_size) * curr_g_size
+        - curr_g_size
+    )
+    return x, y, x_sym, y_sym
