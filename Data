@@ -1,0 +1,66 @@
+from dataclasses import dataclass
+
+WIN_TITLE = "Pixel Drawer"
+ROOT_WIDTH = 500
+ROOT_HEIGHT = 570
+CANVAS_WIDTH = 500
+CANVAS_HEIGHT = 500
+FONT = ["times", 10, "normal"]
+
+
+@dataclass
+class Button:
+    width = 3
+    height = 1
+    bd = 1
+    relief = None
+
+
+@dataclass
+class ColorData:
+    """Tracks info about colors"""
+
+    current_color = "black"
+    previous_color = "white"
+    temp_curr_store = None
+    colors = ("black", "white", "red", "yellow", "blue", "orange", "green", "purple")
+
+
+@dataclass
+class GridData:
+    """Tracks info about grid construction"""
+
+    current_grid_size = 25
+    grid_line_coords = []
+    grid_lines = []
+    show_grid = True
+    grid_sizes = {
+        "small": ("S", 10),
+        "medium": ("M", 20),
+        "large": ("L", 50),
+        "xsmall": ("XS", 5),
+        "xmedium": ("XM", 25),
+        "xlarge": ("XL", 100),
+    }
+
+
+@dataclass
+class SymmetryData:
+    """Tracks info about symmetry"""
+
+    current_symmetry = "none"
+    symmetry_options = {
+        "none": "⨞",
+        "all": "☒",
+        "horizontal": "⨝",
+        "vertical": "⧖",
+        "diagonal": "⍂",
+    }
+
+
+@dataclass
+class FilledData:
+    """Tracks filled squares in grid"""
+
+    filled_coords = {}
+    fill_options = {"clear": "◯", "fill": "⬤", "fill_remaining": "@"}
