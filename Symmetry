@@ -1,0 +1,28 @@
+import tkinter as tk
+
+from Data import Button, ColorData, GridData, SymmetryData, FilledData
+import util
+
+
+class Symmetry:
+    """Holds buttons used to change symmetry"""
+
+    def __init__(self, win: tk):
+        self.symmetry_settings_button_frame = tk.LabelFrame(
+            win, text="Symmetry", labelanchor=tk.N
+        )
+
+        # create buttons
+        for index, option in enumerate(SymmetryData.symmetry_options):
+            btn = util.make_button(
+                self.symmetry_settings_button_frame,
+                text=SymmetryData.symmetry_options[option],
+                command=lambda x=option: self.change_symmetry_type(x),
+            )
+            btn.grid(row=0 if index < 3 else 1, column=index % 3, sticky=tk.EW)
+
+    def change_symmetry_type(self, type_: str):
+        SymmetryData.current_symmetry = type_
+
+    def pack(self):
+        self.symmetry_settings_button_frame.pack(side=tk.LEFT, anchor=tk.NW)
