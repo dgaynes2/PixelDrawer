@@ -1,2 +1,2 @@
 # PixelDrawer
-Tkinter-based pixel are drawing program
+Tkinter-based pixel art drawing program
