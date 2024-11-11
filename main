@@ -1,0 +1,127 @@
+"""This is a simple painting program
+Functions include:
+    color selection
+    left/right click drawing with different colors
+    different grid sizes w/ snap-to-grid
+    several types of symmetry
+    fill/clear screen
+"""
+
+import tkinter as tk
+
+import Data
+from Data import Button, ColorData, GridData, SymmetryData, FilledData
+import util
+from Palette import Palette
+from Grid import Grid
+from Symmetry import Symmetry
+from Fill import Fill
+
+
+class PixelDrawer:
+    def __init__(self, root: tk.Tk = tk.Tk()):
+        self.root = root
+        self.root.title(Data.WIN_TITLE)
+        self.root.geometry(f"{Data.ROOT_WIDTH}x{Data.ROOT_HEIGHT}")
+        self.canvas = None
+
+    def setup(self):
+        """Set up menus and grid and initialize canvas"""
+
+        menuframe = tk.Frame(self.root)
+        menuframe.pack(side=tk.TOP, anchor=tk.W)
+
+        palette = Palette(menuframe)
+        palette.pack()
+
+        grid = Grid(menuframe, self.canvas)
+        grid.pack()
+
+        symmetry = Symmetry(menuframe)
+        symmetry.pack()
+
+        fill = Fill(menuframe, self.canvas, grid)
+        fill.pack()
+
+        easel = tk.Frame(self.root)
+        easel.pack(side=tk.LEFT, anchor=tk.NW, fill=tk.BOTH, expand=True)
+
+        self.canvas = tk.Canvas(
+            easel, bg="white", width=Data.ROOT_WIDTH, height=Data.ROOT_HEIGHT - 70
+        )
+        self.canvas.pack()
+        # TODO: make expandable
+
+        grid.set_canvas(self.canvas)
+        grid.make_grid()
+
+        fill.set_canvas(self.canvas)
+
+    def draw_account_for_symmetry(self, event, x, y):
+        """get_click_coords stores tuples of (x, y, x_sym, y_sym)
+        x_sym is opposite side of x
+        y_sym is opposite side of y
+        x, y -> normal
+        x_sym, y -> horizontal symmetry
+        x, y_sym -> vertical symmetry
+        x_sym, y_sym -> diagonal symmetry
+        """
+
+        self.canvas.create_rectangle(
+            util.get_click_coords(event)[x],
+            util.get_click_coords(event)[y],
+            util.get_click_coords(event)[x] + GridData.current_grid_size,
+            util.get_click_coords(event)[y] + GridData.current_grid_size,
+            fill=ColorData.current_color,
+            outline=ColorData.current_color,
+        )
+
+    def draw_right_click(self, event):
+        """Temporarily swap colors when right mouse click"""
+
+        ColorData.temp_curr_store = ColorData.current_color
+        ColorData.current_color = ColorData.previous_color
+        self.draw(event)
+
+    @staticmethod
+    def revert_color(*args):
+        """On release right click return to current_color"""
+
+        ColorData.current_color = ColorData.temp_curr_store
+
+    def draw(self, event):
+        """Draw on screen based on symmetry selection"""
+
+        FilledData.filled_coords[
+            util.get_click_coords(event)[0], util.get_click_coords(event)[1]
+        ] = ColorData.current_color
+        if SymmetryData.current_symmetry == "none":
+            self.draw_account_for_symmetry(event, 0, 1)
+        if SymmetryData.current_symmetry == "horizontal":
+            self.draw_account_for_symmetry(event, 0, 1)
+            self.draw_account_for_symmetry(event, 2, 1)
+        if SymmetryData.current_symmetry == "vertical":
+            self.draw_account_for_symmetry(event, 0, 1)
+            self.draw_account_for_symmetry(event, 0, 3)
+        if SymmetryData.current_symmetry == "diagonal":
+            self.draw_account_for_symmetry(event, 0, 1)
+            self.draw_account_for_symmetry(event, 2, 3)
+        if SymmetryData.current_symmetry == "all":
+            self.draw_account_for_symmetry(event, 0, 1)
+            self.draw_account_for_symmetry(event, 2, 1)
+            self.draw_account_for_symmetry(event, 0, 3)
+            self.draw_account_for_symmetry(event, 2, 3)
+
+    def run(self):
+        self.setup()
+        self.canvas.bind("<Button-1>", self.draw)
+        self.canvas.bind("<B1-Motion>", self.draw)
+        self.canvas.bind("<Button-3>", self.draw_right_click)
+        self.canvas.bind("<B3-Motion>", self.draw)
+        self.canvas.bind("<ButtonRelease-3>", self.revert_color)
+        self.root.mainloop()
+
+
+if __name__ == "__main__":
+    pd = PixelDrawer()
+    pd.run()
