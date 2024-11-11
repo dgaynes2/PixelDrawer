@@ -1,0 +1,42 @@
+import tkinter as tk
+
+from Data import Button, ColorData, GridData, SymmetryData, FilledData
+import util
+
+
+class Fill:
+    """Holds buttons used to fill and clear screen"""
+
+    def __init__(self, win: tk, canvas: tk, gridclass):
+        self.canvas = canvas
+        self.gridclass = gridclass
+        self.fill_settings_frame = tk.LabelFrame(win, text="Fill", labelanchor=tk.N)
+
+        # create buttons
+        for index, option in enumerate(FilledData.fill_options):
+            btn = util.make_button(
+                self.fill_settings_frame,
+                text=FilledData.fill_options[option],
+                command=lambda x=option: self.fill_or_clear_canvas(x),
+            )
+            btn.grid(row=0 if index < 2 else 1, column=index % 2)
+
+    def set_canvas(self, canvas):
+        """Sets canvas after initilization"""
+
+        self.canvas = canvas
+
+    def fill_or_clear_canvas(self, type_):
+        if type_ == "clear":
+            self.canvas.delete("all")
+            self.canvas["bg"] = "white"
+            FilledData.filled_coords = {}
+            self.gridclass.make_grid(GridData.current_grid_size)
+        elif type_ == "fill":
+            self.canvas["bg"] = ColorData.current_color
+        elif type_ == "fill_remaining":
+            pass
+        # TODO: Fill only uncolored areas
+
+    def pack(self):
+        self.fill_settings_frame.pack(side=tk.LEFT, anchor=tk.NW)
