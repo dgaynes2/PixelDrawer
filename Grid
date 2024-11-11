@@ -1,0 +1,98 @@
+import tkinter as tk
+
+import Data
+from Data import Button, ColorData, GridData, SymmetryData, FilledData
+import util
+
+
+class Grid:
+    """Holds buttons used to change grid size"""
+
+    def __init__(self, win: tk, canvas: tk):
+        self.canvas = canvas
+        self.grid_settings_button_frame = tk.LabelFrame(
+            win, text="Grid", labelanchor=tk.N
+        )
+
+        # create buttons
+        for index, option in enumerate(GridData.grid_sizes):
+            btn = util.make_button(
+                self.grid_settings_button_frame,
+                text=GridData.grid_sizes[option][0],
+                command=lambda x=GridData.grid_sizes[option][1]: self.make_grid(x),
+            )
+            btn.grid(row=0 if index < 3 else 1, column=index % 3)
+
+        grid_toggle_button = util.make_button(
+            self.grid_settings_button_frame,
+            text="#",
+            height=Button.height * 2,
+            command=self.grid_toggle,
+        )
+        grid_toggle_button.grid(row=0, column=3, rowspan=2, sticky=tk.NS)
+
+    def set_canvas(self, canvas):
+        """Sets canvas after initilization"""
+
+        self.canvas = canvas
+
+    def get_dimensions(self, gridsize: int = GridData.current_grid_size):
+        x = gridsize * round(Data.ROOT_WIDTH / gridsize)
+        y = gridsize * round(Data.ROOT_HEIGHT / gridsize)
+        return x, y
+
+    def create_gridlines(self, size: int):
+        """Create coordinate tuples for drawing gridlines"""
+
+        # (h)orizontal
+        for h in range(1, self.get_dimensions(GridData.current_grid_size)[0]):
+            GridData.grid_line_coords.append((0, h * size, Data.ROOT_WIDTH, h * size))
+        # (v)ertical
+        for v in range(1, self.get_dimensions(GridData.current_grid_size)[1]):
+            GridData.grid_line_coords.append((v * size, 0, v * size, Data.ROOT_HEIGHT))
+
+    def draw_gridlines(self):
+        """Draw gridlines to canvas"""
+
+        for line_tuple in GridData.grid_line_coords:
+            line = self.canvas.create_line(line_tuple, fill="light gray")
+            GridData.grid_lines.append(line)
+
+    def grid_toggle(self):
+        """Turn grid on or off"""
+
+        if GridData.show_grid:
+            if len(GridData.grid_lines):
+                for line in GridData.grid_lines:
+                    self.canvas.delete(line)
+        else:
+            self.draw_gridlines()
+
+        GridData.show_grid = not GridData.show_grid
+
+    def make_grid(self, size: int = GridData.current_grid_size):
+        """Create grid then draw grid on canvas"""
+
+        # ensure canvas initiatied
+        if not self.canvas:
+            print("Canvas not set")
+
+        # erase previous grid
+        for _ in GridData.grid_lines:
+            self.canvas.delete(_)
+
+        # clear line cache from previous grid size
+        GridData.grid_line_coords.clear()
+        GridData.grid_lines.clear()
+
+        # update data
+        GridData.current_grid_size = size
+        self.create_gridlines(size)
+
+        self.draw_gridlines()
+
+        # make visible if not already
+        GridData.show_grid = True
+
+    def pack(self):
+        self.grid_settings_button_frame.pack(side=tk.LEFT, anchor=tk.NW)
